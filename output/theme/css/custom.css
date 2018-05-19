@@ -1,0 +1,50 @@
+h1 {
+  font-size:32px;
+}
+
+.article-content p {
+  font-size: 16px;
+  margin-top: 0px;
+}
+
+.article-content h1 {
+    margin: 0px;
+}
+
+time {
+    font-family: "Open Sans";
+}
+
+a.category-link {
+    color: #3875d7;
+    font-family: "Open Sans";
+}
+
+.dataframe {
+    width: inherit;
+}
+
+div.cell, .inner_cell p {
+    padding: 0px;
+    margin: 0px;
+}
+
+.prompt.input_prompt {
+    display: none;
+}
+
+.prompt.output_prompt {
+    display: none;
+}
+
+.cell.border-box-sizing.text_cell.rendered {
+    padding: 0px;
+}
+
+.text_cell_render.border-box-sizing.rendered_html {
+    padding-top: 5px;
+}
+
+ul.list-articles-category li time {
+    width: 12em;
+}
