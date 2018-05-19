@@ -1,3 +1,7 @@
+.container-fluid {
+    padding-bottom: 50px;
+}
+
 h1 {
   font-size:32px;
 }
@@ -48,3 +52,4 @@ div.cell, .inner_cell p {
 ul.list-articles-category li time {
     width: 12em;
 }
+
