@@ -1,3 +1,7 @@
+.container {
+    max-width: inherit;
+}
+
 .container-fluid {
     padding-bottom: 50px;
 }
