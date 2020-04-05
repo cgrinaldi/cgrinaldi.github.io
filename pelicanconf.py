@@ -12,6 +12,31 @@ TIMEZONE = 'America/Los_Angeles'
 
 DEFAULT_LANG = 'en'
 
+# THEME = '/Users/chrisrinaldi/Repositories/blog/theme'
+
+
+PLUGIN_PATHS = ['/Users/chrisrinaldi/Repositories/pelican-plugins']
+PLUGINS = ['sitemap', 'pelican-ipynb.markup']
+
+MARKUP = ('md', 'ipynb')
+IGNORE_FILES = ['.ipynb_checkpoints']
+IPYNB_USE_METACELL = True
+
+SITEMAP = {
+    'format': 'xml',
+    'priorities': {
+        'articles': 1,
+        'indexes': 0.5,
+        'pages': 0.5,
+    },
+    'changefreqs': {
+        'articles': 'always',
+        'indexes': 'hourly',
+        'pages': 'monthly'
+    }
+}
+
+
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
