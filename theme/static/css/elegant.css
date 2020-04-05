@@ -11,6 +11,11 @@ html {
 #push {
     height: 60px;
 }
+
+h1 {
+    margin-top: 24px;
+}
+
 h1,
 h2,
 h3,

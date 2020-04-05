@@ -14,21 +14,33 @@ div.text_cell_render {
     padding: 0;
 }
 
+div.text_cell_render p {
+    margin: 0;
+}
+
 div.prompt {
     font-size: 13px;
 }
 
 div.input_prompt {
-    padding: .7em 0.2em;
+    display: None;
 }
 
 div.output_prompt {
-    padding: .4em .2em;
+    display: None;
 }
 
 div.input_area {
     margin: .2em 0.4em;
-    max-width: 580px;
+}
+
+.dataframe {
+  width: inherit;
+}
+
+table {
+  table-layout: fixed;
+  width: unset;
 }
 
 table.dataframe {
