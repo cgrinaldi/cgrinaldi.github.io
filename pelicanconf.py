@@ -12,7 +12,7 @@ TIMEZONE = 'America/Los_Angeles'
 
 DEFAULT_LANG = 'en'
 
-# THEME = '/Users/chrisrinaldi/Repositories/blog/theme'
+THEME = '/Users/chrisrinaldi/Repositories/blog/theme'
 
 
 PLUGIN_PATHS = ['/Users/chrisrinaldi/Repositories/pelican-plugins']
