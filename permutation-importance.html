@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Chris Rinaldi" />
+        <meta name="copyright" content="Chris Rinaldi" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="ml explainability, sklearn, pandas, Machine learning, " />
+
+<meta property="og:title" content="Permutation Importance"/>
+<meta property="og:url" content="./permutation-importance.html" />
+<meta property="og:description" content="A quick look at calculating permutation importance" />
+<meta property="og:site_name" content="Chris Rinaldi" />
+<meta property="og:article:author" content="Chris Rinaldi" />
+<meta property="og:article:published_time" content="2020-04-05T12:00:00-07:00" />
+<meta name="twitter:title" content="Permutation Importance">
+<meta name="twitter:description" content="A quick look at calculating permutation importance">
+
+        <title>Permutation Importance · Chris Rinaldi
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Raleway:300" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/ipynb.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Chris Rinaldi - Full Atom Feed" />
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-56717704-1', 'auto');
+    ga('send', 'pageview');
+</script>
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-default">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Chris Rinaldi</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul id="top-menu" class="nav pull-right">
+                            <li ><a href="./categories.html">Categories</a></li>
+                            <li ><a href="./tags.html">Tags</a></li>
+                            <li ><a href="./archives.html">Archives</a></li>
+                            <li ><a href="./pages/about.html">About</a></li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page-header span12">
+    <h1><a href="./permutation-importance.html"> Permutation Importance </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span9 article-content">
+
+            
+            <style type="text/css">/*!
+*
+* IPython notebook
+*
+*/
+/* CSS font colors for translated ANSI escape sequences */
+/* The color values are a mix of
+   http://www.xcolors.net/dl/baskerville-ivorylight and
+   http://www.xcolors.net/dl/euphrasia */
+.ansi-black-fg {
+  color: #3E424D;
+}
+.ansi-black-bg {
+  background-color: #3E424D;
+}
+.ansi-black-intense-fg {
+  color: #282C36;
+}
+.ansi-black-intense-bg {
+  background-color: #282C36;
+}
+.ansi-red-fg {
+  color: #E75C58;
+}
+.ansi-red-bg {
+  background-color: #E75C58;
+}
+.ansi-red-intense-fg {
+  color: #B22B31;
+}
+.ansi-red-intense-bg {
+  background-color: #B22B31;
+}
+.ansi-green-fg {
+  color: #00A250;
+}
+.ansi-green-bg {
+  background-color: #00A250;
+}
+.ansi-green-intense-fg {
+  color: #007427;
+}
+.ansi-green-intense-bg {
+  background-color: #007427;
+}
+.ansi-yellow-fg {
+  color: #DDB62B;
+}
+.ansi-yellow-bg {
+  background-color: #DDB62B;
+}
+.ansi-yellow-intense-fg {
+  color: #B27D12;
+}
+.ansi-yellow-intense-bg {
+  background-color: #B27D12;
+}
+.ansi-blue-fg {
+  color: #208FFB;
+}
+.ansi-blue-bg {
+  background-color: #208FFB;
+}
+.ansi-blue-intense-fg {
+  color: #0065CA;
+}
+.ansi-blue-intense-bg {
+  background-color: #0065CA;
+}
+.ansi-magenta-fg {
+  color: #D160C4;
+}
+.ansi-magenta-bg {
+  background-color: #D160C4;
+}
+.ansi-magenta-intense-fg {
+  color: #A03196;
+}
+.ansi-magenta-intense-bg {
+  background-color: #A03196;
+}
+.ansi-cyan-fg {
+  color: #60C6C8;
+}
+.ansi-cyan-bg {
+  background-color: #60C6C8;
+}
+.ansi-cyan-intense-fg {
+  color: #258F8F;
+}
+.ansi-cyan-intense-bg {
+  background-color: #258F8F;
+}
+.ansi-white-fg {
+  color: #C5C1B4;
+}
+.ansi-white-bg {
+  background-color: #C5C1B4;
+}
+.ansi-white-intense-fg {
+  color: #A1A6B2;
+}
+.ansi-white-intense-bg {
+  background-color: #A1A6B2;
+}
+.ansi-default-inverse-fg {
+  color: #FFFFFF;
+}
+.ansi-default-inverse-bg {
+  background-color: #000000;
+}
+.ansi-bold {
+  font-weight: bold;
+}
+.ansi-underline {
+  text-decoration: underline;
+}
+/* The following styles are deprecated an will be removed in a future version */
+.ansibold {
+  font-weight: bold;
+}
+.ansi-inverse {
+  outline: 0.5px dotted;
+}
+/* use dark versions for foreground, to improve visibility */
+.ansiblack {
+  color: black;
+}
+.ansired {
+  color: darkred;
+}
+.ansigreen {
+  color: darkgreen;
+}
+.ansiyellow {
+  color: #c4a000;
+}
+.ansiblue {
+  color: darkblue;
+}
+.ansipurple {
+  color: darkviolet;
+}
+.ansicyan {
+  color: steelblue;
+}
+.ansigray {
+  color: gray;
+}
+/* and light for background, for the same reason */
+.ansibgblack {
+  background-color: black;
+}
+.ansibgred {
+  background-color: red;
+}
+.ansibggreen {
+  background-color: green;
+}
+.ansibgyellow {
+  background-color: yellow;
+}
+.ansibgblue {
+  background-color: blue;
+}
+.ansibgpurple {
+  background-color: magenta;
+}
+.ansibgcyan {
+  background-color: cyan;
+}
+.ansibggray {
+  background-color: gray;
+}
+div.cell {
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border-radius: 2px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  width: 100%;
+  padding: 5px;
+  /* This acts as a spacer between cells, that is outside the border */
+  margin: 0px;
+  outline: none;
+  position: relative;
+  overflow: visible;
+}
+div.cell:before {
+  position: absolute;
+  display: block;
+  top: -1px;
+  left: -1px;
+  width: 5px;
+  height: calc(100% +  2px);
+  content: '';
+  background: transparent;
+}
+div.cell.jupyter-soft-selected {
+  border-left-color: #E3F2FD;
+  border-left-width: 1px;
+  padding-left: 5px;
+  border-right-color: #E3F2FD;
+  border-right-width: 1px;
+  background: #E3F2FD;
+}
+@media print {
+  div.cell.jupyter-soft-selected {
+    border-color: transparent;
+  }
+}
+div.cell.selected,
+div.cell.selected.jupyter-soft-selected {
+  border-color: #ababab;
+}
+div.cell.selected:before,
+div.cell.selected.jupyter-soft-selected:before {
+  position: absolute;
+  display: block;
+  top: -1px;
+  left: -1px;
+  width: 5px;
+  height: calc(100% +  2px);
+  content: '';
+  background: #42A5F5;
+}
+@media print {
+  div.cell.selected,
+  div.cell.selected.jupyter-soft-selected {
+    border-color: transparent;
+  }
+}
+.edit_mode div.cell.selected {
+  border-color: #66BB6A;
+}
+.edit_mode div.cell.selected:before {
+  position: absolute;
+  display: block;
+  top: -1px;
+  left: -1px;
+  width: 5px;
+  height: calc(100% +  2px);
+  content: '';
+  background: #66BB6A;
+}
+@media print {
+  .edit_mode div.cell.selected {
+    border-color: transparent;
+  }
+}
+.prompt {
+  /* This needs to be wide enough for 3 digit prompt numbers: In[100]: */
+  min-width: 14ex;
+  /* This padding is tuned to match the padding on the CodeMirror editor. */
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace;
+  text-align: right;
+  /* This has to match that of the the CodeMirror class line-height below */
+  line-height: 1.21429em;
+  /* Don't highlight prompt number selection */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Use default cursor */
+  cursor: default;
+}
+@media (max-width: 540px) {
+  .prompt {
+    text-align: left;
+  }
+}
+div.inner_cell {
+  min-width: 0;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  /* Old browsers */
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  box-flex: 1;
+  /* Modern browsers */
+  flex: 1;
+}
+/* input_area and input_prompt must match in top border and margin for alignment */
+div.input_area {
+  border: 1px solid #cfcfcf;
+  border-radius: 2px;
+  background: #f7f7f7;
+  line-height: 1.21429em;
+}
+/* This is needed so that empty prompt areas can collapse to zero height when there
+   is no content in the output_subarea and the prompt. The main purpose of this is
+   to make sure that empty JavaScript output_subareas have no height. */
+div.prompt:empty {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+div.unrecognized_cell {
+  padding: 5px 5px 5px 0px;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: horizontal;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+div.unrecognized_cell .inner_cell {
+  border-radius: 2px;
+  padding: 5px;
+  font-weight: bold;
+  color: red;
+  border: 1px solid #cfcfcf;
+  background: #eaeaea;
+}
+div.unrecognized_cell .inner_cell a {
+  color: inherit;
+  text-decoration: none;
+}
+div.unrecognized_cell .inner_cell a:hover {
+  color: inherit;
+  text-decoration: none;
+}
+@media (max-width: 540px) {
+  div.unrecognized_cell > div.prompt {
+    display: none;
+  }
+}
+div.code_cell {
+  /* avoid page breaking on code cells when printing */
+}
+@media print {
+  div.code_cell {
+    page-break-inside: avoid;
+  }
+}
+/* any special styling for code cells that are currently running goes here */
+div.input {
+  page-break-inside: avoid;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: horizontal;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+@media (max-width: 540px) {
+  div.input {
+    /* Old browsers */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-box-align: stretch;
+    display: -moz-box;
+    -moz-box-orient: vertical;
+    -moz-box-align: stretch;
+    display: box;
+    box-orient: vertical;
+    box-align: stretch;
+    /* Modern browsers */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+/* input_area and input_prompt must match in top border and margin for alignment */
+div.input_prompt {
+  color: #303F9F;
+  border-top: 1px solid transparent;
+}
+div.input_area > div.highlight {
+  margin: 0.4em;
+  border: none;
+  padding: 0px;
+  background-color: transparent;
+}
+div.input_area > div.highlight > pre {
+  margin: 0px;
+  border: none;
+  padding: 0px;
+  background-color: transparent;
+}
+/* The following gets added to the <head> if it is detected that the user has a
+ * monospace font with inconsistent normal/bold/italic height.  See
+ * notebookmain.js.  Such fonts will have keywords vertically offset with
+ * respect to the rest of the text.  The user should select a better font.
+ * See: https://github.com/ipython/ipython/issues/1503
+ *
+ * .CodeMirror span {
+ *      vertical-align: bottom;
+ * }
+ */
+.CodeMirror {
+  line-height: 1.21429em;
+  /* Changed from 1em to our global default */
+  font-size: 14px;
+  height: auto;
+  /* Changed to auto to autogrow */
+  background: none;
+  /* Changed from white to allow our bg to show through */
+}
+.CodeMirror-scroll {
+  /*  The CodeMirror docs are a bit fuzzy on if overflow-y should be hidden or visible.*/
+  /*  We have found that if it is visible, vertical scrollbars appear with font size changes.*/
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+.CodeMirror-lines {
+  /* In CM2, this used to be 0.4em, but in CM3 it went to 4px. We need the em value because */
+  /* we have set a different line-height and want this to scale with that. */
+  /* Note that this should set vertical padding only, since CodeMirror assumes
+       that horizontal padding will be set on CodeMirror pre */
+  padding: 0.4em 0;
+}
+.CodeMirror-linenumber {
+  padding: 0 8px 0 4px;
+}
+.CodeMirror-gutters {
+  border-bottom-left-radius: 2px;
+  border-top-left-radius: 2px;
+}
+.CodeMirror pre {
+  /* In CM3 this went to 4px from 0 in CM2. This sets horizontal padding only,
+    use .CodeMirror-lines for vertical */
+  padding: 0 0.4em;
+  border: 0;
+  border-radius: 0;
+}
+.CodeMirror-cursor {
+  border-left: 1.4px solid black;
+}
+@media screen and (min-width: 2138px) and (max-width: 4319px) {
+  .CodeMirror-cursor {
+    border-left: 2px solid black;
+  }
+}
+@media screen and (min-width: 4320px) {
+  .CodeMirror-cursor {
+    border-left: 4px solid black;
+  }
+}
+/*
+
+Original style from softwaremaniacs.org (c) Ivan Sagalaev <Maniac@SoftwareManiacs.Org>
+Adapted from GitHub theme
+
+*/
+.highlight-base {
+  color: #000;
+}
+.highlight-variable {
+  color: #000;
+}
+.highlight-variable-2 {
+  color: #1a1a1a;
+}
+.highlight-variable-3 {
+  color: #333333;
+}
+.highlight-string {
+  color: #BA2121;
+}
+.highlight-comment {
+  color: #408080;
+  font-style: italic;
+}
+.highlight-number {
+  color: #080;
+}
+.highlight-atom {
+  color: #88F;
+}
+.highlight-keyword {
+  color: #008000;
+  font-weight: bold;
+}
+.highlight-builtin {
+  color: #008000;
+}
+.highlight-error {
+  color: #f00;
+}
+.highlight-operator {
+  color: #AA22FF;
+  font-weight: bold;
+}
+.highlight-meta {
+  color: #AA22FF;
+}
+/* previously not defined, copying from default codemirror */
+.highlight-def {
+  color: #00f;
+}
+.highlight-string-2 {
+  color: #f50;
+}
+.highlight-qualifier {
+  color: #555;
+}
+.highlight-bracket {
+  color: #997;
+}
+.highlight-tag {
+  color: #170;
+}
+.highlight-attribute {
+  color: #00c;
+}
+.highlight-header {
+  color: blue;
+}
+.highlight-quote {
+  color: #090;
+}
+.highlight-link {
+  color: #00c;
+}
+/* apply the same style to codemirror */
+.cm-s-ipython span.cm-keyword {
+  color: #008000;
+  font-weight: bold;
+}
+.cm-s-ipython span.cm-atom {
+  color: #88F;
+}
+.cm-s-ipython span.cm-number {
+  color: #080;
+}
+.cm-s-ipython span.cm-def {
+  color: #00f;
+}
+.cm-s-ipython span.cm-variable {
+  color: #000;
+}
+.cm-s-ipython span.cm-operator {
+  color: #AA22FF;
+  font-weight: bold;
+}
+.cm-s-ipython span.cm-variable-2 {
+  color: #1a1a1a;
+}
+.cm-s-ipython span.cm-variable-3 {
+  color: #333333;
+}
+.cm-s-ipython span.cm-comment {
+  color: #408080;
+  font-style: italic;
+}
+.cm-s-ipython span.cm-string {
+  color: #BA2121;
+}
+.cm-s-ipython span.cm-string-2 {
+  color: #f50;
+}
+.cm-s-ipython span.cm-meta {
+  color: #AA22FF;
+}
+.cm-s-ipython span.cm-qualifier {
+  color: #555;
+}
+.cm-s-ipython span.cm-builtin {
+  color: #008000;
+}
+.cm-s-ipython span.cm-bracket {
+  color: #997;
+}
+.cm-s-ipython span.cm-tag {
+  color: #170;
+}
+.cm-s-ipython span.cm-attribute {
+  color: #00c;
+}
+.cm-s-ipython span.cm-header {
+  color: blue;
+}
+.cm-s-ipython span.cm-quote {
+  color: #090;
+}
+.cm-s-ipython span.cm-link {
+  color: #00c;
+}
+.cm-s-ipython span.cm-error {
+  color: #f00;
+}
+.cm-s-ipython span.cm-tab {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAMCAYAAAAkuj5RAAAAAXNSR0IArs4c6QAAAGFJREFUSMft1LsRQFAQheHPowAKoACx3IgEKtaEHujDjORSgWTH/ZOdnZOcM/sgk/kFFWY0qV8foQwS4MKBCS3qR6ixBJvElOobYAtivseIE120FaowJPN75GMu8j/LfMwNjh4HUpwg4LUAAAAASUVORK5CYII=);
+  background-position: right;
+  background-repeat: no-repeat;
+}
+div.output_wrapper {
+  /* this position must be relative to enable descendents to be absolute within it */
+  position: relative;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  z-index: 1;
+}
+/* class for the output area when it should be height-limited */
+div.output_scroll {
+  /* ideally, this would be max-height, but FF barfs all over that */
+  height: 24em;
+  /* FF needs this *and the wrapper* to specify full width, or it will shrinkwrap */
+  width: 100%;
+  overflow: auto;
+  border-radius: 2px;
+  -webkit-box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+  display: block;
+}
+/* output div while it is collapsed */
+div.output_collapsed {
+  margin: 0px;
+  padding: 0px;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+div.out_prompt_overlay {
+  height: 100%;
+  padding: 0px 0.4em;
+  position: absolute;
+  border-radius: 2px;
+}
+div.out_prompt_overlay:hover {
+  /* use inner shadow to get border that is computed the same on WebKit/FF */
+  -webkit-box-shadow: inset 0 0 1px #000;
+  box-shadow: inset 0 0 1px #000;
+  background: rgba(240, 240, 240, 0.5);
+}
+div.output_prompt {
+  color: #D84315;
+}
+/* This class is the outer container of all output sections. */
+div.output_area {
+  padding: 0px;
+  page-break-inside: avoid;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: horizontal;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+div.output_area .MathJax_Display {
+  text-align: left !important;
+}
+div.output_area 
+div.output_area 
+div.output_area img,
+div.output_area svg {
+  max-width: 100%;
+  height: auto;
+}
+div.output_area img.unconfined,
+div.output_area svg.unconfined {
+  max-width: none;
+}
+div.output_area .mglyph > img {
+  max-width: none;
+}
+/* This is needed to protect the pre formating from global settings such
+   as that of bootstrap */
+.output {
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+@media (max-width: 540px) {
+  div.output_area {
+    /* Old browsers */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-box-align: stretch;
+    display: -moz-box;
+    -moz-box-orient: vertical;
+    -moz-box-align: stretch;
+    display: box;
+    box-orient: vertical;
+    box-align: stretch;
+    /* Modern browsers */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+div.output_area pre {
+  margin: 0;
+  padding: 1px 0 1px 0;
+  border: 0;
+  vertical-align: baseline;
+  color: black;
+  background-color: transparent;
+  border-radius: 0;
+}
+/* This class is for the output subarea inside the output_area and after
+   the prompt div. */
+div.output_subarea {
+  overflow-x: auto;
+  padding: 0.4em;
+  /* Old browsers */
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  box-flex: 1;
+  /* Modern browsers */
+  flex: 1;
+  max-width: calc(100% - 14ex);
+}
+div.output_scroll div.output_subarea {
+  overflow-x: visible;
+}
+/* The rest of the output_* classes are for special styling of the different
+   output types */
+/* all text output has this class: */
+div.output_text {
+  text-align: left;
+  color: #000;
+  /* This has to match that of the the CodeMirror class line-height below */
+  line-height: 1.21429em;
+}
+/* stdout/stderr are 'text' as well as 'stream', but execute_result/error are *not* streams */
+div.output_stderr {
+  background: #fdd;
+  /* very light red background for stderr */
+}
+div.output_latex {
+  text-align: left;
+}
+/* Empty output_javascript divs should have no height */
+div.output_javascript:empty {
+  padding: 0;
+}
+.js-error {
+  color: darkred;
+}
+/* raw_input styles */
+div.raw_input_container {
+  line-height: 1.21429em;
+  padding-top: 5px;
+}
+pre.raw_input_prompt {
+  /* nothing needed here. */
+}
+input.raw_input {
+  font-family: monospace;
+  font-size: inherit;
+  color: inherit;
+  width: auto;
+  /* make sure input baseline aligns with prompt */
+  vertical-align: baseline;
+  /* padding + margin = 0.5em between prompt and cursor */
+  padding: 0em 0.25em;
+  margin: 0em 0.25em;
+}
+input.raw_input:focus {
+  box-shadow: none;
+}
+p.p-space {
+  margin-bottom: 10px;
+}
+div.output_unrecognized {
+  padding: 5px;
+  font-weight: bold;
+  color: red;
+}
+div.output_unrecognized a {
+  color: inherit;
+  text-decoration: none;
+}
+div.output_unrecognized a:hover {
+  color: inherit;
+  text-decoration: none;
+}
+.rendered_html {
+  color: #000;
+  /* any extras will just be numbers: */
+}
+
+
+
+.rendered_html :link {
+  text-decoration: underline;
+}
+.rendered_html :visited {
+  text-decoration: underline;
+}
+
+
+
+
+
+
+.rendered_html h1:first-child {
+  margin-top: 0.538em;
+}
+.rendered_html h2:first-child {
+  margin-top: 0.636em;
+}
+.rendered_html h3:first-child {
+  margin-top: 0.777em;
+}
+.rendered_html h4:first-child {
+  margin-top: 1em;
+}
+.rendered_html h5:first-child {
+  margin-top: 1em;
+}
+.rendered_html h6:first-child {
+  margin-top: 1em;
+}
+.rendered_html ul:not(.list-inline),
+.rendered_html ol:not(.list-inline) {
+  padding-left: 2em;
+}
+
+
+
+
+
+
+
+
+.rendered_html * + ul {
+  margin-top: 1em;
+}
+.rendered_html * + ol {
+  margin-top: 1em;
+}
+
+
+
+
+
+.rendered_html pre,
+
+
+
+
+.rendered_html tr,
+.rendered_html th,
+
+
+.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+.rendered_html * + table {
+  margin-top: 1em;
+}
+
+.rendered_html * + p {
+  margin-top: 1em;
+}
+
+.rendered_html * + img {
+  margin-top: 1em;
+}
+.rendered_html img,
+
+.rendered_html img.unconfined,
+
+
+.rendered_html * + .alert {
+  margin-top: 1em;
+}
+[dir="rtl"] 
+div.text_cell {
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: horizontal;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+@media (max-width: 540px) {
+  div.text_cell > div.prompt {
+    display: none;
+  }
+}
+div.text_cell_render {
+  /*font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;*/
+  outline: none;
+  resize: none;
+  width: inherit;
+  border-style: none;
+  padding: 0.5em 0.5em 0.5em 0.4em;
+  color: #000;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+a.anchor-link:link {
+  text-decoration: none;
+  padding: 0px 20px;
+  visibility: hidden;
+}
+h1:hover .anchor-link,
+h2:hover .anchor-link,
+h3:hover .anchor-link,
+h4:hover .anchor-link,
+h5:hover .anchor-link,
+h6:hover .anchor-link {
+  visibility: visible;
+}
+.text_cell.rendered .input_area {
+  display: none;
+}
+.text_cell.rendered 
+.text_cell.rendered .rendered_html tr,
+.text_cell.rendered .rendered_html th,
+.text_cell.rendered 
+.text_cell.unrendered .text_cell_render {
+  display: none;
+}
+.text_cell .dropzone .input_area {
+  border: 2px dashed #bababa;
+  margin: -1px;
+}
+.cm-header-1,
+.cm-header-2,
+.cm-header-3,
+.cm-header-4,
+.cm-header-5,
+.cm-header-6 {
+  font-weight: bold;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.cm-header-1 {
+  font-size: 185.7%;
+}
+.cm-header-2 {
+  font-size: 157.1%;
+}
+.cm-header-3 {
+  font-size: 128.6%;
+}
+.cm-header-4 {
+  font-size: 110%;
+}
+.cm-header-5 {
+  font-size: 100%;
+  font-style: italic;
+}
+.cm-header-6 {
+  font-size: 100%;
+  font-style: italic;
+}
+</style>
+<style type="text/css">.highlight .hll { background-color: #ffffcc }
+.highlight  { background: #f8f8f8; }
+.highlight .c { color: #408080; font-style: italic } /* Comment */
+.highlight .err { border: 1px solid #FF0000 } /* Error */
+.highlight .k { color: #008000; font-weight: bold } /* Keyword */
+.highlight .o { color: #666666 } /* Operator */
+.highlight .ch { color: #408080; font-style: italic } /* Comment.Hashbang */
+.highlight .cm { color: #408080; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #BC7A00 } /* Comment.Preproc */
+.highlight .cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
+.highlight .c1 { color: #408080; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #408080; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #A00000 } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #FF0000 } /* Generic.Error */
+.highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight .gi { color: #00A000 } /* Generic.Inserted */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight .gt { color: #0044DD } /* Generic.Traceback */
+.highlight .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.highlight .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.highlight .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.highlight .kp { color: #008000 } /* Keyword.Pseudo */
+.highlight .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #B00040 } /* Keyword.Type */
+.highlight .m { color: #666666 } /* Literal.Number */
+.highlight .s { color: #BA2121 } /* Literal.String */
+.highlight .na { color: #7D9029 } /* Name.Attribute */
+.highlight .nb { color: #008000 } /* Name.Builtin */
+.highlight .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.highlight .no { color: #880000 } /* Name.Constant */
+.highlight .nd { color: #AA22FF } /* Name.Decorator */
+.highlight .ni { color: #999999; font-weight: bold } /* Name.Entity */
+.highlight .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #0000FF } /* Name.Function */
+.highlight .nl { color: #A0A000 } /* Name.Label */
+.highlight .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.highlight .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.highlight .nv { color: #19177C } /* Name.Variable */
+.highlight .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mb { color: #666666 } /* Literal.Number.Bin */
+.highlight .mf { color: #666666 } /* Literal.Number.Float */
+.highlight .mh { color: #666666 } /* Literal.Number.Hex */
+.highlight .mi { color: #666666 } /* Literal.Number.Integer */
+.highlight .mo { color: #666666 } /* Literal.Number.Oct */
+.highlight .sa { color: #BA2121 } /* Literal.String.Affix */
+.highlight .sb { color: #BA2121 } /* Literal.String.Backtick */
+.highlight .sc { color: #BA2121 } /* Literal.String.Char */
+.highlight .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.highlight .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.highlight .s2 { color: #BA2121 } /* Literal.String.Double */
+.highlight .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+.highlight .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.highlight .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+.highlight .sx { color: #008000 } /* Literal.String.Other */
+.highlight .sr { color: #BB6688 } /* Literal.String.Regex */
+.highlight .s1 { color: #BA2121 } /* Literal.String.Single */
+.highlight .ss { color: #19177C } /* Literal.String.Symbol */
+.highlight .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #0000FF } /* Name.Function.Magic */
+.highlight .vc { color: #19177C } /* Name.Variable.Class */
+.highlight .vg { color: #19177C } /* Name.Variable.Global */
+.highlight .vi { color: #19177C } /* Name.Variable.Instance */
+.highlight .vm { color: #19177C } /* Name.Variable.Magic */
+.highlight .il { color: #666666 } /* Literal.Number.Integer.Long */</style><div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Permutation Importance</strong> is a way to better understand what features in your model have the most impact when predicting the target variable. In other words, it is a way to measure <strong>feature importance</strong>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Conceptually, it is easy to understand and can be applied to any model. There is also a nice Python package, <a href="https://eli5.readthedocs.io/en/latest/index.html">eli5</a> to calculate it.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Create-Datasets">Create Datasets<a class="anchor-link" href="#Create-Datasets">&#182;</a></h1><p>This isn't the point of this post, but we'll be using the <a href="https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_california_housing.html">California Housing Dataset</a>. Let's quickly create the necessary datasets we'll be needing.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">sklearn</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_california_housing</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="k">def</span> <span class="nf">init_data</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Fetch the California data and create Pandas DataFrame.&quot;&quot;&quot;</span>
+    <span class="n">raw_data</span> <span class="o">=</span> <span class="n">fetch_california_housing</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">raw_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">raw_data</span><span class="p">[</span><span class="s1">&#39;feature_names&#39;</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Price&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_data</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+<span class="k">def</span> <span class="nf">create_datasets</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validation_frac</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create training and validation datasets.&quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Price&#39;</span><span class="p">]</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Price&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">validation_frac</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">init_data</span><span class="p">()</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">create_datasets</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">X_train</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>(16512, 8)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[1]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>MedInc</th>
+      <th>HouseAge</th>
+      <th>AveRooms</th>
+      <th>AveBedrms</th>
+      <th>Population</th>
+      <th>AveOccup</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>20307</th>
+      <td>2.6098</td>
+      <td>18.0</td>
+      <td>3.706056</td>
+      <td>1.016248</td>
+      <td>3129.0</td>
+      <td>4.621861</td>
+      <td>34.15</td>
+      <td>-119.17</td>
+    </tr>
+    <tr>
+      <th>2005</th>
+      <td>0.7990</td>
+      <td>25.0</td>
+      <td>3.645435</td>
+      <td>1.150743</td>
+      <td>1343.0</td>
+      <td>2.851380</td>
+      <td>36.74</td>
+      <td>-119.80</td>
+    </tr>
+    <tr>
+      <th>8296</th>
+      <td>4.3889</td>
+      <td>52.0</td>
+      <td>4.290064</td>
+      <td>1.028846</td>
+      <td>1144.0</td>
+      <td>1.833333</td>
+      <td>33.76</td>
+      <td>-118.14</td>
+    </tr>
+    <tr>
+      <th>3476</th>
+      <td>8.1248</td>
+      <td>18.0</td>
+      <td>7.851309</td>
+      <td>1.021990</td>
+      <td>3189.0</td>
+      <td>3.339267</td>
+      <td>34.32</td>
+      <td>-118.52</td>
+    </tr>
+    <tr>
+      <th>5901</th>
+      <td>2.4074</td>
+      <td>24.0</td>
+      <td>3.333333</td>
+      <td>1.050401</td>
+      <td>2522.0</td>
+      <td>2.888889</td>
+      <td>34.17</td>
+      <td>-118.31</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">y_train</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[2]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>20307    1.461
+2005     0.518
+8296     3.780
+3476     3.740
+5901     2.194
+Name: Price, dtype: float64</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Train-a-RandomForest-Model">Train a RandomForest Model<a class="anchor-link" href="#Train-a-RandomForest-Model">&#182;</a></h1><p>Also not the point of this post, but we need a trained model for which we want to evaluate the <strong>permutation importance</strong> for. In this case, we'll be using <strong>sklearn</strong>'s <code>RandomForestRegressor</code>, and evaluating its predictions using <code>mean_absolute_error()</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_absolute_error</span>
+
+<span class="k">def</span> <span class="nf">train_model_and_predict</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_val</span><span class="p">)</span>
+
+<span class="n">baseline_pred</span> <span class="o">=</span> <span class="n">y_train</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">model</span><span class="p">,</span> <span class="n">preds</span> <span class="o">=</span> <span class="n">train_model_and_predict</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">)</span>
+
+<span class="c1"># Evaluate MAE of predictions</span>
+<span class="n">baseline_mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">([</span><span class="n">baseline_pred</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_val</span><span class="p">),</span> <span class="n">y_val</span><span class="p">)</span>
+<span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Baseline MAE on validation dataset: </span><span class="si">{</span><span class="n">baseline_mae</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;RF MAE on validation dataset: </span><span class="si">{</span><span class="n">mae</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Baseline MAE on validation dataset: 0.922.
+RF MAE on validation dataset: 0.328
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Permutation-Importance">Permutation Importance<a class="anchor-link" href="#Permutation-Importance">&#182;</a></h1><p>Permtuation Importance allows us to answer the question, "how would our model have performed if it didn't have access to a particular feature?". Conceptually, more important features will be the ones that have the largest impact when removed from the modeling process.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To actually do this, we will do the following:</p>
+<ol>
+<li>Take the trained model</li>
+<li>Randomly shuffle 1 column</li>
+<li>Create predictions using this new dataset </li>
+<li>Calculate the MAE of our predictions</li>
+<li>Subtract the new MAE (which should be higher) from our original MAE</li>
+</ol>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Randomly shuffling the feature has the same impact as removing it, since we are completely destroying the relationship with the outcome variable of interest.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">shuffle_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shuffle a single column of a DataFrame, return a copy.&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">result</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">calc_feature_permutation_mae</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">feature</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the MAE after permuting a particular feature.&quot;&quot;&quot;</span>
+    <span class="n">X_shuffled</span> <span class="o">=</span> <span class="n">shuffle_column</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">feature</span><span class="p">)</span>
+    <span class="n">preds_shuffled</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_shuffled</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">preds_shuffled</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">calc_permutation_importance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate Permutation Importance for all model features.&quot;&quot;&quot;</span>
+    <span class="n">importances</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+        <span class="n">importances</span><span class="p">[</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">calc_feature_permutation_mae</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">feature</span><span class="p">)</span> <span class="o">-</span> <span class="n">mae</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">importances</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">calc_permutation_importance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
+<span class="n">importances</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">importances</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Permutation Importance&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Change in MAE&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[(&#39;MedInc&#39;, 0.4656078229006018), (&#39;Latitude&#39;, 0.3681427987533668), (&#39;Longitude&#39;, 0.313516140948717), (&#39;AveOccup&#39;, 0.15820252426438614), (&#39;HouseAge&#39;, 0.05195238744685643), (&#39;AveRooms&#39;, 0.03337708491198049), (&#39;AveBedrms&#39;, 0.009278008643218094), (&#39;Population&#39;, 0.006155723338973851)]
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We see that for our model, the most importance features are:</p>
+<ul>
+<li>MedInc</li>
+<li>Latitude</li>
+<li>Longitude</li>
+</ul>
+<p><strong>Permutation Importance</strong> found that if we removed the above features, the model's performance degrades the most. Conversely, it found we could drop the <strong>Population</strong> feature and not lose any predictive power.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="ELI5-and-Permutation-Importance">ELI5 and Permutation Importance<a class="anchor-link" href="#ELI5-and-Permutation-Importance">&#182;</a></h1><p><a href="https://eli5.readthedocs.io/en/latest/index.html">eli5</a> is a Python package that makes it simple to calculate <strong>permutation importance</strong> (amongst other things). If we use <code>neg_mean_absolute_error</code> as our scoring function, you'll see that we get values very similar to the ones we calcualted above. It also includes a measure of uncertainty, since it repated the permutation process multiple times.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">eli5</span>
+<span class="kn">from</span> <span class="nn">eli5.sklearn</span> <span class="kn">import</span> <span class="n">PermutationImportance</span>
+
+<span class="n">perm</span> <span class="o">=</span> <span class="n">PermutationImportance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;neg_mean_absolute_error&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+<span class="n">eli5</span><span class="o">.</span><span class="n">show_weights</span><span class="p">(</span><span class="n">perm</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="n">X_val</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[6]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <style>
+    table.eli5-weights tr:hover {
+        filter: brightness(85%);
+    }
+</style>
+
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+    
+        <table class="eli5-weights eli5-feature-importances" style="border-collapse: collapse; border: none; margin-top: 0em; table-layout: auto;">
+    <thead>
+    <tr style="border: none;">
+        <th style="padding: 0 1em 0 0.5em; text-align: right; border: none;">Weight</th>
+        <th style="padding: 0 0.5em 0 0.5em; text-align: left; border: none;">Feature</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr style="background-color: hsl(120, 100.00%, 80.00%); border: none;">
+            <td style="padding: 0 1em 0 0.5em; text-align: right; border: none;">
+                0.4718
+                
+                    &plusmn; 0.0103
+                
+            </td>
+            <td style="padding: 0 0.5em 0 0.5em; text-align: left; border: none;">
+                MedInc
+            </td>
+        </tr>
+    
+        <tr style="background-color: hsl(120, 100.00%, 83.34%); border: none;">
+            <td style="padding: 0 1em 0 0.5em; text-align: right; border: none;">
+                0.3635
+                
+                    &plusmn; 0.0079
+                
+            </td>
+            <td style="padding: 0 0.5em 0 0.5em; text-align: left; border: none;">
+                Latitude
+            </td>
+        </tr>
+    
+        <tr style="background-color: hsl(120, 100.00%, 85.09%); border: none;">
+            <td style="padding: 0 1em 0 0.5em; text-align: right; border: none;">
+                0.3101
+                
+                    &plusmn; 0.0111
+                
+            </td>
+            <td style="padding: 0 0.5em 0 0.5em; text-align: left; border: none;">
+                Longitude
+            </td>
+        </tr>
+    
+        <tr style="background-color: hsl(120, 100.00%, 90.52%); border: none;">
+            <td style="padding: 0 1em 0 0.5em; text-align: right; border: none;">
+                0.1623
+                
+                    &plusmn; 0.0077
+                
+            </td>
+            <td style="padding: 0 0.5em 0 0.5em; text-align: left; border: none;">
+                AveOccup
+            </td>
+        </tr>
+    
+        <tr style="background-color: hsl(120, 100.00%, 95.47%); border: none;">
+            <td style="padding: 0 1em 0 0.5em; text-align: right; border: none;">
+                0.0566
+                
+                    &plusmn; 0.0036
+                
+            </td>
+            <td style="padding: 0 0.5em 0 0.5em; text-align: left; border: none;">
+                HouseAge
+            </td>
+        </tr>
+    
+        <tr style="background-color: hsl(120, 100.00%, 96.73%); border: none;">
+            <td style="padding: 0 1em 0 0.5em; text-align: right; border: none;">
+                0.0355
+                
+                    &plusmn; 0.0021
+                
+            </td>
+            <td style="padding: 0 0.5em 0 0.5em; text-align: left; border: none;">
+                AveRooms
+            </td>
+        </tr>
+    
+        <tr style="background-color: hsl(120, 100.00%, 98.74%); border: none;">
+            <td style="padding: 0 1em 0 0.5em; text-align: right; border: none;">
+                0.0091
+                
+                    &plusmn; 0.0005
+                
+            </td>
+            <td style="padding: 0 0.5em 0 0.5em; text-align: left; border: none;">
+                AveBedrms
+            </td>
+        </tr>
+    
+        <tr style="background-color: hsl(120, 100.00%, 98.87%); border: none;">
+            <td style="padding: 0 1em 0 0.5em; text-align: right; border: none;">
+                0.0078
+                
+                    &plusmn; 0.0022
+                
+            </td>
+            <td style="padding: 0 0.5em 0 0.5em; text-align: left; border: none;">
+                Population
+            </td>
+        </tr>
+    
+    
+    </tbody>
+</table>
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+ 
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: 'center'," +
+        "    displayIndent: '0em'," +
+        "    showMathMenu: true," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['$','$'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        " linebreaks: { automatic: true, width: '95% container' }, " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
+        "    } " +
+        "}); ";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+
+            
+            <hr/>
+            <section>
+<div class="accordion" id="accordion2">
+    <div class="accordion-group">
+        <div class="accordion-heading">
+            <a class="accordion-toggle disqus-comment-count" data-toggle="collapse" data-parent="#accordion2"
+                href="./permutation-importance.html#disqus_thread">
+                Comments
+            </a>
+        </div>
+        <div id="disqus_thread" class="accordion-body collapse">
+            <div class="accordion-inner">
+                <div class="comments">
+                    <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'chrisrinaldi';
+        var disqus_identifier = './permutation-importance.html';
+    var disqus_url = './permutation-importance.html';
+
+    (function() {
+         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+         dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2020-04-05T12:00:00-07:00">Apr 5, 2020</time>
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#machine-learning-ref">Machine learning</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags.html#ml-explainability-ref">ml explainability
+                    <span>1</span>
+</a></li>
+                <li><a href="./tags.html#pandas-ref">pandas
+                    <span>2</span>
+</a></li>
+                <li><a href="./tags.html#sklearn-ref">sklearn
+                    <span>1</span>
+</a></li>
+            </ul>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <div class="footer-content">
+<h4> </h4>
+    <a href="https://www.linkedin.com/in/cgrinaldi/" title="My LinkedIn Profile" class="social-links" target="_blank">
+    <i class="fa fa-linkedin social-links"></i></a>
+    <a href="http://github.com/cgrinaldi" title="My Github Profile" class="social-links" target="_blank">
+    <i class="fa fa-github social-links"></i></a>
+    <a href="http://twitter.com/cgrinaldi" title="My Twitter Profile" class="social-links" target="_blank">
+    <i class="fa fa-twitter social-links"></i></a>
+    <a href="mailto:cgrinaldi@gmail.com" title="My Email Address" class="social-links" target="_blank">
+    <i class="fa fa-envelope social-links"></i></a>
+    </div>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+            <script type="text/javascript">
+var disqus_shortname = 'chrisrinaldi';
+(function () {
+    var s = document.createElement('script'); s.async = true;
+    s.type = 'text/javascript';
+    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+}());
+</script>
+<script  language="javascript" type="text/javascript">
+function uncollapse() {
+    if (window.location.hash.match(/^#comment-\d+$/)) {
+        $('#disqus_thread').collapse('show');
+    }
+}
+</script>
+<script type="text/javascript" language="JavaScript">
+uncollapse();
+window.onhashchange=function(){
+    if (window.location.hash.match(/^#comment-\d+$/))
+        window.location.reload(true);
+}
+</script>
+<script>
+$('#disqus_thread').on('shown', function () {
+    var link = document.getElementsByClassName('accordion-toggle');
+    var old_innerHTML = link[0].innerHTML;
+    $(link[0]).fadeOut(500, function() {
+        $(this).text('Click here to hide comments').fadeIn(500);
+    });
+    $('#disqus_thread').on('hidden', function () {
+        $(link[0]).fadeOut(500, function() {
+            $(this).text(old_innerHTML).fadeIn(500);
+        });
+    })
+})
+</script>
+
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : http://oncrashreboot.com/pelican-elegant -->
+</html>
